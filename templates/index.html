@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+  <script type="text/javascript" charset="utf-8"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", ()=>{
+    var socket=io.connect(location.protocol+'//'+document.domain+':'+location.port+'/group');
+    document.querySelector("#msgsend").disabled=true;
+    socket.on('userjoined', data=>{
+      const li=document.createElement("li");
+      li.innerHTML=`${data.user} joined ${data.room}`
+      document.querySelector("#msglist").append(li);
+    });
+    document.querySelector('#msg').onkeyup=()=>{
+      if (document.querySelector('#msg').value.length>0)
+          document.querySelector("#msgsend").disabled=false;
+      else {
+        document.querySelector("#msgsend").disabled=true;
+      }
+    };
+    document.querySelector("#msgsend").onclick=()=>{
+    const msg=document.querySelector("#msg").value
+    socket.emit("msg",{"msg":msg});
+    console.log("msg emitted")
+    };
+    socket.on('msgsend',data=>{
+      console.log("msg received")
+      const li= document.createElement("li");
+      li.innerHTML=`${data.name}: ${data.msg}`;
+      document.querySelector("#msglist").append(li);
+      document.querySelector("#msg").value='';
+      document.querySelector("#msgsend").disabled=true;
+      return false;
+    });
+  });
+  </script>
+</head>
+<body>
+  Name: {{ user }}<br>
+  Group: {{ room }}<br>
+  <ul id="msglist"></ul>
+  <input type="text" name="msg" id="msg">
+  <button id="msgsend">Send</button>
+</body>
+</html>

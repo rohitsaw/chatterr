@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+    <style>
+    .center{
+      width: 675px;
+      height: 321px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin-left: -140px;
+      margin-top: -80px;
+    }
+    @keyframes grow {
+      from{
+        font-size: 20px
+      }
+      to{
+        font-size: 70px;
+      }
+    }
+    h1{
+      animation-name: grow;
+      animation-duration: 2s;
+      animation-fill-mode: forwards;
+      text-align: center;
+      color: red;
+      font-style: italic;
+    }
+    </style>
+    <title>Flack</title>
+  </head>
+  <body>
+    <h1>choose your username</h1>
+    <div class="center">
+    <form id="form-control" action="{{ url_for("chat") }}" method="post">
+      <input name="name" type="text" placeholder="Type your username">
+      <button id="button">Set Name</button>
+    </form>
+  </div>
+  </body>
+  </html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Available room</title>
+</head>
+<body>
+  <ul>
+  <form action="{{ url_for('sessionroom') }}" method="post">
+    <select name="name">
+      {% for room in roomlist %}
+      <option value="{{ room }}">{{ room }}</option>
+      {% endfor %}
+    </select>
+    <input type="submit">
+  </form>
+  </ul>
+</body>
+</html>
