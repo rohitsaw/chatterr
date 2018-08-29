@@ -1,1 +1,1 @@
-web: gunicorn evenlet -w 4 app:app
+web: gunicorn eventlet -w 4 app:app
