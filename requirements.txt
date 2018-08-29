@@ -1,4 +1,4 @@
-gunicorn
+gunicorn==0.16.1
 eventlet
 Flask
 
