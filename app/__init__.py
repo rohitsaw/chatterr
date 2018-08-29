@@ -38,13 +38,10 @@ def chat():
 def createroom():
     if 'name' in session:
         room=request.form.get("name")
-        print(room)
-        print("in createroom")
         if room in roomlist:
             return render_template("error.html")
         roomlist.append(room)
         session['room']=room
-        print(session['room'])
         return render_template("index.html",user=session['name'], group=session['room'])
     else:
         return render_template("type-name.html")
@@ -54,8 +51,6 @@ def createroom():
 def joinroom():
     if 'name' in session:
         room=request.form.get("name")
-        print(room)
-        print("in joinroom")
         session['room']=room
         return render_template("index.html",user=session['name'], group=session['room'])
     else:
@@ -79,7 +74,6 @@ def msg_handle(data):
 def test_disconnect():
     name=session['name']
     room=session["room"]
-    print("in discoonect event")
     emit("userleave", {"user":name}, room=room)
 
 # @app.route("logout", methods=["POST"])
