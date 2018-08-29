@@ -3,15 +3,33 @@
 <head>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
   <script type="text/javascript" charset="utf-8"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
   <script>
   document.addEventListener("DOMContentLoaded", ()=>{
-    var socket=io.connect(location.protocol+'//'+document.domain+':'+location.port+'/group');
+    var socket=io.connect(location.protocol+'//'+document.domain+':'+location.port);
     document.querySelector("#msgsend").disabled=true;
+
+    // socket.on('connect', function() {
+    // socket.emit('join', {"room":"room1"});
+    // });
     socket.on('userjoined', data=>{
-      const li=document.createElement("li");
-      li.innerHTML=`${data.user} joined ${data.room}`
-      document.querySelector("#msglist").append(li);
+      // const li=document.createElement("li");
+      // li.innerHTML=`${data.user} joined room`
+      // document.querySelector("#msglist").append(li);
+      // alert(`${data.user} connected`);
+      const li = document.createElement("li");
+      li.innerHTML=`${data.user} connected`;
+      document.querySelector("#userlogin").append(li);
     });
+
+    socket.on("userleave", data=>{
+      // alert(`${data.user} has leave room`);
+      const li = document.createElement("li");
+      li.innerHTML=`${data.user} disconnected`;
+      document.querySelector("#userlogin").append(li);
+    });
+
     document.querySelector('#msg').onkeyup=()=>{
       if (document.querySelector('#msg').value.length>0)
           document.querySelector("#msgsend").disabled=false;
@@ -37,10 +55,21 @@
   </script>
 </head>
 <body>
+  <div class="container">
+    <div class="row">
+      <div class="col-6">
   Name: {{ user }}<br>
-  Group: {{ room }}<br>
+  Group: {{ group }}<br>
   <ul id="msglist"></ul>
   <input type="text" name="msg" id="msg">
   <button id="msgsend">Send</button>
+</div>
+<div class="col-4">
+  <ul id="userlogin">
+  </ul>
+</div>
+
+</div>
+</div>
 </body>
 </html>
