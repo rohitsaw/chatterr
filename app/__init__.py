@@ -52,7 +52,7 @@ def joinroom():
     if 'name' in session:
         room=request.form.get("name")
         session['room']=room
-        return render_template("index.html",user=session['name'], group=session['room'])
+        return redirect(url_for("index"))
     else:
         return render_template("type-name.html")
 
