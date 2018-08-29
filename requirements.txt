@@ -3,4 +3,4 @@ flask_socketio
 flask_session
 requests
 gunicorn
-evenlet
+eventlet
