@@ -15,12 +15,13 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 roomlist=["Group1", "Group2", "Group3"]
+msg={}
 
 @app.route("/")
 def index():
     if 'name' in session:
         if 'room' in session:
-            return render_template("index.html",user=session['name'], group=session['room'])
+            return render_template("index.html",user=session['name'], group=session['room'], pmsg=msg[session["room"]])
         return render_template("COJ.html", name=session['name'], roomlist=roomlist)
     else:
         return render_template("type-name.html")
@@ -42,7 +43,9 @@ def createroom():
             return render_template("error.html")
         roomlist.append(room)
         session['room']=room
-        return render_template("index.html",user=session['name'], group=session['room'])
+        if msg.get(room) is None:
+            msg[room]=[]
+        return redirect(url_for("index"))
     else:
         return render_template("type-name.html")
 
@@ -52,6 +55,8 @@ def joinroom():
     if 'name' in session:
         room=request.form.get("name")
         session['room']=room
+        if msg.get(room) is None:
+            msg[room]=[]
         return redirect(url_for("index"))
     else:
         return render_template("type-name.html")
@@ -61,13 +66,16 @@ def joinroom():
 def on_connect():
     room=session['room']
     join_room(room)
-
     emit('userjoined',{"user":session['name']}, room=room)
 
 
 @socketio.on("msg")
 def msg_handle(data):
     room=session['room']
+    msgitem=data["msg"]
+    msgitem=session["name"]+":"+msgitem
+    msg[room].append(msgitem)
+    print(msg)
     emit("msgsend",{"msg":data["msg"], "name":session['name']}, broadcast=True, room=room)
 
 @socketio.on('disconnect')
