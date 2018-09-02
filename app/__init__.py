@@ -74,7 +74,12 @@ def msg_handle(data):
     room=session['room']
     msgitem=data["msg"]
     msgitem=session["name"]+":"+msgitem
-    msg[room].append(msgitem)
+    if len(msg[room])<=99:
+        msg[room].append(msgitem)
+    else:
+        del msg[room][0]
+        msg[room].append(msgitem)
+
     print(msg)
     emit("msgsend",{"msg":data["msg"], "name":session['name']}, broadcast=True, room=room)
 
