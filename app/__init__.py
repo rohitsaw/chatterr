@@ -73,14 +73,16 @@ def on_connect():
 def msg_handle(data):
     room=session['room']
     msgitem=data["msg"]
-    msgitem=session["name"]+":"+msgitem
+    msgitem=session["name"]+" : "+msgitem
     if len(msg[room])<=99:
         msg[room].append(msgitem)
     else:
         del msg[room][0]
         msg[room].append(msgitem)
-
-    print(msg)
+    # for item in msg[room]:
+    #     print(item)
+    #     name=item.split(' ',1)[0]
+    #     print(name)
     emit("msgsend",{"msg":data["msg"], "name":session['name']}, broadcast=True, room=room)
 
 @socketio.on('disconnect')
