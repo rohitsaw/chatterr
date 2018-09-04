@@ -79,10 +79,6 @@ def msg_handle(data):
     else:
         del msg[room][0]
         msg[room].append(msgitem)
-    # for item in msg[room]:
-    #     print(item)
-    #     name=item.split(' ',1)[0]
-    #     print(name)
     emit("msgsend",{"msg":data["msg"], "name":session['name']}, broadcast=True, room=room)
 
 @socketio.on('disconnect')
@@ -91,8 +87,13 @@ def test_disconnect():
     room=session["room"]
     emit("userleave", {"user":name}, room=room)
 
-# @app.route("logout", methods=["POST"])
-# def logout():
-#     session.pop('room', None)
-#     session.pop('name',None)
-#     return redirect(url_for("index"))
+@app.route("/sendrequest",methods=["POST"])
+def sendrequest():
+    message=str(request.form.get("message"))
+    print(msg[session["room"]])
+    print(message)
+    if message in msg[session["room"]]:
+        msg[session["room"]].remove(message)
+        print(msg[session["room"]])
+        return "message deleted successfully"
+    return "something went wrong"

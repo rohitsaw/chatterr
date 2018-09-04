@@ -5,6 +5,14 @@
   <script type="text/javascript" charset="utf-8"></script>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 	<style>
+  @keyframes hide {
+    from{
+      opacity: 1;
+    }
+    to{
+      opacity: 0;
+    }
+  }
 	.chat{
     width: 100%;
     border: 2px solid black;
@@ -19,6 +27,12 @@
       padding: 0;
       margin: 0;
       }
+      #msglist>li{
+        animation-name: hide;
+        animation-duration: 2s;
+        animation-fill-mode: forwards;
+        animation-play-state: paused;
+      }
       li  > div{
       width: 50%;
       border: 2px solid black;
@@ -28,6 +42,9 @@
       padding: 2px;
       text-align: center;
     }
+    .hide{
+    float: left;
+    }
 	</style>
   <script>
   document.addEventListener("DOMContentLoaded", ()=>{
@@ -36,15 +53,8 @@
 
     document.querySelector("#msgsend").disabled=true;
 
-    // socket.on('connect', function() {
-    // socket.emit('join', {"room":"room1"});
-    // });
     socket.on('userjoined', data=>{
-      // const li=document.createElement("li");
-      // li.innerHTML=`${data.user} joined room`
-      // document.querySelector("#msglist").append(li);
       console.log("user log in")
-      // alert(`${data.user} connected`);
       const li = document.createElement("li");
       li.innerHTML=`${data.user} connected`;
       document.querySelector("#userlogin").append(li);
@@ -73,20 +83,12 @@
       console.log("msg received")
       const li= document.createElement("li");
       if (`${data.name}`=="{{ user }}"){
-        li.innerHTML=`<div style="float:left">${data.name} : ${data.msg}</div>`;
+        li.innerHTML=`<div style="float:left">${data.name} : ${data.msg}</div><button class="hide">DELETE</button>`;
       }
       else{
         li.innerHTML=`<div style="float:right">${data.name} : ${data.msg}</div>`;
       }
 
-
-      // {% for item in pmsg %}
-      // if (`${data.name}`=="{{ item }}")
-      // {
-      //   console.log("hahaha")
-      //   li.style.float="right";
-      // }
-      // {% endfor %}
 
       document.querySelector("#msglist").append(li);
       document.querySelector("#msg").value='';
@@ -95,27 +97,35 @@
     });
 
   });
-  // setInterval(function() {
-  // var chat = document.querySelector(".chat");
-  // // allow 1px inaccuracy by adding 1
-  // var isScrolledToBottom = (chat.scrollHeight - chat.clientHeight <= chat.scrollTop + 1);
-  // if (isScrolledToBottom) {
-  //     chat.scrollTop = chat.scrollHeight - chat.clientHeight;
-  //   }
-  // }, 500)
+  document.addEventListener("click", event => {
+    console.log("something is clicked")
+    const element = event.target;
+    if (element.className==="hide"){
+      console.log("button clicked")
+      element.parentElement.style.animationPlayState="running";
+      element.parentElement.addEventListener("animationend", ()=>{
+        console.log("animation end")
+          let message = element.parentElement.firstChild.innerHTML;
+          console.log(message)
+          const request = new XMLHttpRequest();
+          request.open('POST','/sendrequest')
+          request.onload=()=>{
+            const response = request.responseText;
+            if (response=="message deleted successfully"){
+              element.parentElement.remove();
+              alert(response);            
+            }
+            else{
+              alert(response);
+            }
+          }
+          const data = new FormData();
+          data.append('message', message);
+          request.send(data);
 
-  // setInterval(updateScroll,300);
-  // var scrolled = false;
-  // function updateScroll(){
-  // if(!scrolled){
-	// var element = document.querySelector(".chat");
-	// element.scrollTop = element.scrollHeight;
-	// };
-	// };
-	// document.querySelector(".chat").onscroll=function(){
-	// console.log("in onscroll")
-  //   scrolled=true;
-	// };
+      });
+    }
+  });
   </script>
 </head>
 <body>
@@ -128,7 +138,7 @@
   <ul id="msglist">
     {% for item in pmsg %}
         {% if item.split(' ',1)[0]==user %}
-        <li><div style="float:left">{{item}}</div></li>
+        <li><div style="float:left">{{item}}</div><button class="hide">DELETE</button></li>
         {% else %}
         <li><div style="float:right">{{item}}<div></li>
         {% endif %}
