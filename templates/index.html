@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+  <script type="text/javascript" charset="utf-8"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+  <style>
+  @keyframes hide {
+    0% {
+      opacity: 1;
+    }
+    75% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 0;
+      height: 0px;
+      /* line-height: 0px;
+      padding: 0px;
+      margin: 0px; */
+    }
+  }
+	.chat{
+    width: 100%;
+    border: 2px solid black;
+  	background-color: lightblue;
+    height: 75vh;
+    overflow: scroll;
+    /* Scroll position: scrollTop; */
+		}
+    #msglist{
+      list-style:none;
+      padding: 0;
+      margin: 0;
+      }
+      #msglist>li{
+        animation-name: hide;
+        animation-duration: 1s;
+        animation-fill-mode: forwards;
+        animation-play-state: paused;
+      }
+      li  > div{
+      width: 50%;
+      border: 2px solid black;
+      background-color: pink;
+      border-radius: 20px;
+      margin: 4px;
+      padding: 2px;
+      text-align: center;
+    }
+    .hide{
+    float: left;
+    }
+	</style>
+  <script>
+  document.addEventListener("DOMContentLoaded", ()=>{
+    var socket=io.connect(location.protocol+'//'+document.domain+':'+location.port);
+
+
+  var element = document.querySelector(".chat")
+      element.scrollTop = element.scrollHeight - element.clientHeight;
+
+    document.querySelector("#msgsend").disabled=true;
+
+    socket.on('userjoined', data=>{
+      console.log("user log in")
+      const li = document.createElement("li");
+      li.innerHTML=`${data.user} connected`;
+      document.querySelector("#userlogin").append(li);
+    });
+
+    socket.on("userleave", data=>{
+      // alert(`${data.user} has leave room`);
+      const li = document.createElement("li");
+      li.innerHTML=`${data.user} disconnected`;
+      document.querySelector("#userlogin").append(li);
+    });
+
+    document.querySelector('#msg').onkeyup=()=>{
+      if (document.querySelector('#msg').value.length>0)
+          document.querySelector("#msgsend").disabled=false;
+      else {
+        document.querySelector("#msgsend").disabled=true;
+      }
+    };
+    document.querySelector("#msgsend").onclick=()=>{
+    const msg=document.querySelector("#msg").value
+    socket.emit("msg",{"msg":msg});
+    console.log("msg emitted")
+    };
+    socket.on('msgsend',data=>{
+      
+      console.log("msg received")
+      const li= document.createElement("li");
+      if (`${data.name}`=="{{ user }}"){
+        li.innerHTML=`<div style="float:left;white-space: pre-wrap;">${data.name} : ${data.msg} \n ${data.timestamp}</div><button class="hide fa fa-trash"></button>`;
+      }
+      else{
+        li.innerHTML=`<div style="float:right;white-space: pre-wrap;">${data.name} : ${data.msg} \n ${data.timestamp}</div>`;
+      }
+
+
+      document.querySelector("#msglist").append(li);
+
+      var element = document.querySelector(".chat")
+      element.scrollTop = element.scrollHeight - element.clientHeight;
+      document.querySelector("#msg").value='';
+      document.querySelector("#msgsend").disabled=true;
+      return false;
+    });
+
+  });
+  document.addEventListener("click", event => {
+    console.log("something is clicked")
+    const element = event.target;
+    if (element.classList.contains('hide')){
+      console.log("button clicked")
+      element.parentElement.style.animationPlayState="running";
+      element.parentElement.addEventListener("animationend", ()=>{
+        console.log("animation end")
+          let message = element.parentElement.firstChild.innerHTML;
+          console.log(message)
+          const request = new XMLHttpRequest();
+          request.open('POST','/sendrequest')
+          request.onload=()=>{
+            const response = request.responseText;
+            if (response=="message deleted successfully"){
+              element.parentElement.remove();
+              alert(response);
+            }
+            else{
+              alert(response);
+            }
+          }
+          const data = new FormData();
+          data.append('message', message);
+          request.send(data);
+
+      });
+    }
+  });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-6">
+      <div class="card">
+
+  <div class="card-header">
+  Name: {{ user }}<br>
+  Group Name: {{ group }}<br>
+  </div>
+
+  <div class="chat card-body" style="overflow-x:hidden;">
+  <ul id="msglist">
+    {% for item in pmsg %}
+        {% if item.split(' ',1)[0]==user %}
+        <li><div style="float:left;white-space: pre-wrap;">{{item}}</div><button class="hide fa fa-trash"></button></li>
+        {% else %}
+        <li><div style="float:right;white-space: pre-wrap;">{{item}}<div></li>
+        {% endif %}
+    {% endfor %}
+  </ul>
+  </div>
+  <div class="card-footer">
+  <input class="form-control" style="width:85%;display:inline;" type="text" name="msg" id="msg" placeholder="Type your message">
+  <button class="btn btn-outline-success" style="display:inline;" id="msgsend">Send</button>
+  </div>
+  </div>
+</div>
+<div class="col-4">
+  <ul id="userlogin">
+  </ul>
+</div>
+
+</div>
+</div>
+</body>
+</html>
