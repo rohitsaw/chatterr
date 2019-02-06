@@ -9,6 +9,6 @@ pip install -r requirements.txt
 IN chatterr/app/ directry
 
 command to run in cmd
-set FLASK_APP=__init__.py
+set FLASK_APP=application.py
 set FLASK_ENV=development
 flask run
