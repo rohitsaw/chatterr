@@ -1,6 +1,16 @@
-chatting webapp using Flask Socketio
+# chatting webapp using Flask Socketio
 
-Instruction to run app locally in Windows Os
+A flask socket IO app for real time chatting
+
+### feature
+
+* create unlimited chat room
+* delete own send message
+* user can join any chat room
+
+
+
+### Instruction to run app locally in Windows Os
 
 first install dependency via pip in chatterr folder
 
